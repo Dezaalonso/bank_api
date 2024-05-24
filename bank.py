@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, MetaData, inspect
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+# Enable CORS for the entire app, allowing requests from any origin
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configuration for multiple databases
 app.config['SQLALCHEMY_BINDS'] = {
@@ -27,7 +31,7 @@ class Bank(db.Model):
     __tablename__ = 'bank'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
-    money = db.Column(db.Numeric(10, 2))
+    money = db.Column(db.Integer)  # Changed from Numeric to Integer
 
 
 def table_exists(engine, table_name):
@@ -60,7 +64,7 @@ def create_bank_account(user_id):
         return jsonify({'error': 'User not found'}), 404
     
     # Create a new bank account for the user
-    new_bank_account = Bank(user_id=user.id, money=money)
+    new_bank_account = Bank(user_id=user.id, money=int(money))  # Convert money to integer
     db.session.add(new_bank_account)
     db.session.commit()
 
